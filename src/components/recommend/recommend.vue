@@ -12,7 +12,8 @@
           </slider>
         </div>
         <div class="recommend-list">
-          <h1 class="list-title">热门歌单推荐</h1>
+          <h1 class="list-title ">热门歌单推荐</h1>
+          <div class="list-title" @click="_getDiscListNew">最新日语歌单</div>
           <ul>
             <li @click="selectItem(item)" v-for="item in discList" class="item">
               <div class="icon">
@@ -38,7 +39,7 @@
   import Slider from 'base/slider/slider'
   import Loading from 'base/loading/loading'
   import Scroll from 'base/scroll/scroll'
-  import {getRecommend, getDiscList} from 'api/recommend'
+  import {getRecommend, getDiscList,getDiscListNew} from 'api/recommend'
   import {playlistMixin} from 'common/js/mixin'
   import {ERR_OK} from 'api/config'
   import {mapMutations} from 'vuex'
@@ -55,6 +56,8 @@
       this._getRecommend()
 
       this._getDiscList()
+     
+      this._getDiscListNew()
     },
     methods: {
       handlePlaylist(playlist) {
@@ -84,6 +87,13 @@
       },
       _getDiscList() {
         getDiscList().then((res) => {
+          if (res.code === ERR_OK) {
+            this.discList = res.data.list
+          }
+        })
+      },
+      _getDiscListNew() {
+        getDiscListNew().then((res) => {
           if (res.code === ERR_OK) {
             this.discList = res.data.list
           }
