@@ -12,19 +12,40 @@
           </slider>
         </div>
         <div class="recommend-list">
-          <h1 class="list-title ">热门歌单推荐</h1>
-          <div class="list-title" @click="_getDiscListNew">最新日语歌单</div>
-          <ul>
-            <li @click="selectItem(item)" v-for="item in discList" class="item">
-              <div class="icon">
-                <img width="60" height="60" v-lazy="item.imgurl">
-              </div>
-              <div class="text">
-                <h2 class="name" v-html="item.creator.name"></h2>
-                <p class="desc" v-html="item.dissname"></p>
-              </div>
-            </li>
-          </ul>
+          <div class="list-title ">
+          	<switches :switches="switches" :currentIndex="currentIndex" @switch="switchItem"></switches>
+          </div>
+           <scroll ref="songList" v-if="currentIndex===0" class="list-scroll" :data="discList">
+            <div >
+             <ul>
+               <li @click="selectItem(item)" v-for="item in discList" class="item">
+               <div class="icon">
+                 <img width="60" height="60" v-lazy="item.imgurl">
+               </div>
+               <div class="text">
+                 <h2 class="name" v-html="item.creator.name"></h2>
+                 <p class="desc" v-html="item.dissname"></p>
+               </div>
+               </li>
+             </ul>
+            </div>
+          </scroll>
+           <scroll ref="songListNew" v-if="currentIndex===1" class="list-scroll" :data="discListNew">
+            <div >
+             <ul>
+               <li @click="selectItem(item)" v-for="item in discListNew" class="item">
+               <div class="icon">
+                 <img width="60" height="60" v-lazy="item.imgurl">
+               </div>
+               <div class="text">
+                 <h2 class="name" v-html="item.creator.name"></h2>
+                 <p class="desc" v-html="item.dissname"></p>
+               </div>
+               </li>
+             </ul>
+            </div>
+          </scroll>          
+          
         </div>
       </div>
       <div class="loading-container" v-show="!discList.length">
@@ -43,13 +64,24 @@
   import {playlistMixin} from 'common/js/mixin'
   import {ERR_OK} from 'api/config'
   import {mapMutations} from 'vuex'
+  import Switches from 'base/switches/switches'
 
   export default {
     mixins: [playlistMixin],
     data() {
       return {
         recommends: [],
-        discList: []
+        discList: [],
+        discListNew: [],
+        currentIndex: 0,
+        switches: [
+          {
+            name: '日语热推'
+          },
+          {
+            name: '日语新推'
+          }
+        ]
       }
     },
     created() {
@@ -70,6 +102,13 @@
         if (!this.checkloaded) {
           this.checkloaded = true
           this.$refs.scroll.refresh()
+          setTimeout(() => {
+          if (this.currentIndex === 0) {
+            this.$refs.songList.refresh()
+          } else {
+            this.$refs.songListNew.refresh()
+          }
+        }, 20)
         }
       },
       selectItem(item) {
@@ -95,9 +134,12 @@
       _getDiscListNew() {
         getDiscListNew().then((res) => {
           if (res.code === ERR_OK) {
-            this.discList = res.data.list
+            this.discListNew = res.data.list
           }
         })
+      },
+      switchItem(index) {
+        this.currentIndex = index
       },
       ...mapMutations({
         setDisc: 'SET_DISC'
@@ -106,6 +148,7 @@
     components: {
       Slider,
       Loading,
+      Switches,
       Scroll
     }
   }
@@ -128,33 +171,32 @@
         overflow: hidden
       .recommend-list
         .list-title
-          height: 65px
-          line-height: 65px
-          text-align: center
           font-size: $font-size-medium
-          color: $color-theme
-        .item
-          display: flex
-          box-sizing: border-box
-          align-items: center
-          padding: 0 20px 20px 20px
-          .icon
-            flex: 0 0 60px
-            width: 60px
-            padding-right: 20px
-          .text
-            display: flex
-            flex-direction: column
-            justify-content: center
-            flex: 1
-            line-height: 20px
-            overflow: hidden
-            font-size: $font-size-medium
-            .name
-              margin-bottom: 10px
-              color: $color-text
-            .desc
-              color: $color-text-d
+        .list-scroll
+          height: 100%
+          overflow: hidden
+        	.item
+          	display: flex
+          	box-sizing: border-box
+          	align-items: center
+          	padding: 0 20px 20px 20px
+          	.icon
+            	flex: 0 0 60px
+            	width: 60px
+            	padding-right: 20px
+          	.text
+            	display: flex
+            	flex-direction: column
+            	justify-content: center
+            	flex: 1
+            	line-height: 20px
+            	overflow: hidden
+            	font-size: $font-size-medium
+            	.name
+              	margin-bottom: 10px
+              	color: $color-text
+            	.desc
+              	color: $color-text-d
       .loading-container
         position: absolute
         width: 100%
