@@ -37,7 +37,7 @@ export function getDiscList() {
 }
 
 export function getDiscListNew() {
-  const url = '/api/getDiscList'
+  const url = '/api/getDiscListNew'
 
   const data = Object.assign({}, commonParams, {
     platform: 'yqq',
